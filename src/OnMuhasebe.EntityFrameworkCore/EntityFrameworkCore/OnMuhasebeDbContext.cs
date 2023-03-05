@@ -1,9 +1,29 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Data;
+using Microsoft.EntityFrameworkCore;
+using OnMuhasebe.BankAccounts;
+using OnMuhasebe.BankBranchs;
+using OnMuhasebe.Banks;
+using OnMuhasebe.Branchs;
+using OnMuhasebe.Cashs;
+using OnMuhasebe.Configurations;
+using OnMuhasebe.Consts;
+using OnMuhasebe.Costs;
+using OnMuhasebe.Currents;
+using OnMuhasebe.Invoices;
+using OnMuhasebe.Parameters;
+using OnMuhasebe.Periods;
+using OnMuhasebe.Receipts;
+using OnMuhasebe.Services;
+using OnMuhasebe.SpecialCodes;
+using OnMuhasebe.Stocks;
+using OnMuhasebe.Units;
+using OnMuhasebe.Warehouses;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.Data;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.EntityFrameworkCore;
+using Volo.Abp.EntityFrameworkCore.Modeling;
 using Volo.Abp.FeatureManagement.EntityFrameworkCore;
 using Volo.Abp.Identity;
 using Volo.Abp.Identity.EntityFrameworkCore;
@@ -52,6 +72,23 @@ public class OnMuhasebeDbContext :
 
     #endregion
 
+    public DbSet<BankAccount> BankAccounts { get; set; }
+    public DbSet<BankBranch> BankBranchs { get; set; }
+    public DbSet<Bank> Banks { get; set; }
+    public DbSet<Branch> Branchs { get; set; }
+    public DbSet<Cash> Cashs { get; set; }
+    public DbSet<Cost> Costs { get; set; }
+    public DbSet<Current> Currents { get; set; }
+    public DbSet<Invoice> Invoices { get; set; }
+    public DbSet<CompanyParameter> CompanyParameters { get; set; }
+    public DbSet<Period> Periods { get; set; }
+    public DbSet<Receipt> Receipts { get; set; }
+    public DbSet<Service> Service { get; set; }
+    public DbSet<SpecialCode> SpecialCodes { get; set; }
+    public DbSet<Stock> Stocks { get; set; }
+    public DbSet<Unit> Units { get; set; }
+    public DbSet<Warehouse> Warehouses { get; set; }
+
     public OnMuhasebeDbContext(DbContextOptions<OnMuhasebeDbContext> options)
         : base(options)
     {
@@ -74,12 +111,22 @@ public class OnMuhasebeDbContext :
         builder.ConfigureTenantManagement();
 
         /* Configure your own tables/entities inside here */
+        builder.ConfigureBank();
+        builder.ConfigureBankBranch();
+        builder.ConfigureBankAccount();
+        builder.ConfigureUnit();
+        builder.ConfigureCurrent();
+        builder.ConfigureWarehouse();
+        builder.ConfigurePeriod();
+        builder.ConfigureInvoice();
+        builder.ConfigureInvoiceMovement();
+        builder.ConfigureCompanyParameter();
+        builder.ConfigureService();
+        builder.ConfigureCash();
+        builder.ConfigureReceipt();
+        builder.ConfigureReceiptMovement();
 
-        //builder.Entity<YourEntity>(b =>
-        //{
-        //    b.ToTable(OnMuhasebeConsts.DbTablePrefix + "YourEntities", OnMuhasebeConsts.DbSchema);
-        //    b.ConfigureByConvention(); //auto configure for the base class props
-        //    //...
-        //});
+
+
     }
 }
