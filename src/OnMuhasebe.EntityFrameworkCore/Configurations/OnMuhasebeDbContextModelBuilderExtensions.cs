@@ -3,8 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using OnMuhasebe.BankAccounts;
 using OnMuhasebe.BankBranchs;
 using OnMuhasebe.Banks;
+using OnMuhasebe.Branchs;
 using OnMuhasebe.Cashs;
 using OnMuhasebe.Consts;
+using OnMuhasebe.Costs;
 using OnMuhasebe.Currents;
 using OnMuhasebe.Invoices;
 using OnMuhasebe.Parameters;
@@ -12,6 +14,8 @@ using OnMuhasebe.Periods;
 using OnMuhasebe.ReceiptMovements;
 using OnMuhasebe.Receipts;
 using OnMuhasebe.Services;
+using OnMuhasebe.SpecialCodes;
+using OnMuhasebe.Stocks;
 using OnMuhasebe.Units;
 using OnMuhasebe.Warehouses;
 using Volo.Abp.EntityFrameworkCore.Modeling;
@@ -93,7 +97,7 @@ public static class OnMuhasebeDbContextModelBuilderExtensions
                 .HasColumnType(SqlDbType.VarChar.ToString())
                 .HasMaxLength(BankAccountConsts.MaxIbanNoLength);
 
-            b.Property(x => x.BankBranch)
+            b.Property(x => x.BankBranchId)
                 .IsRequired()
                 .HasColumnType(SqlDbType.UniqueIdentifier.ToString());
 
@@ -569,7 +573,7 @@ public static class OnMuhasebeDbContextModelBuilderExtensions
                 .IsRequired()
                 .HasColumnType(SqlDbType.UniqueIdentifier.ToString());
 
-            b.Property(x => x.Period)
+            b.Property(x => x.PeriodId)
                 .IsRequired()
                 .HasColumnType(SqlDbType.UniqueIdentifier.ToString());
 
@@ -839,12 +843,12 @@ public static class OnMuhasebeDbContextModelBuilderExtensions
 
             b.Property(x => x.CheckAccountNo)
                 .IsRequired()
-                .HasColumnType(SqlDbType.TinyInt.ToString())
+                .HasColumnType(SqlDbType.VarChar.ToString())
                 .HasMaxLength(ReceiptMovementConsts.MaxCheckAccountNoLength);
 
             b.Property(x => x.DocumentNo)
                 .IsRequired()
-                .HasColumnType(SqlDbType.TinyInt.ToString())
+                .HasColumnType(SqlDbType.VarChar.ToString())
                 .HasMaxLength(ReceiptMovementConsts.MaxDocumentNoLength);
 
             b.Property(x => x.Expiry)
@@ -853,12 +857,12 @@ public static class OnMuhasebeDbContextModelBuilderExtensions
 
             b.Property(x => x.PrincipalDebtor)
                  .IsRequired()
-                 .HasColumnType(SqlDbType.TinyInt.ToString())
+                 .HasColumnType(SqlDbType.VarChar.ToString())
                  .HasMaxLength(ReceiptMovementConsts.MaxPrincipalDebtorLength);
 
             b.Property(x => x.Ciranta)
                 .IsRequired()
-               .HasColumnType(SqlDbType.TinyInt.ToString())
+               .HasColumnType(SqlDbType.VarChar.ToString())
                 .HasMaxLength(ReceiptMovementConsts.MaxCirantaLength);
 
             b.Property(x => x.CashId)
@@ -906,6 +910,213 @@ public static class OnMuhasebeDbContextModelBuilderExtensions
             b.HasOne(x => x.BankAccount)
                .WithMany(x => x.ReceiptMovements)
                .OnDelete(DeleteBehavior.NoAction);
+        });
+    }
+
+    public static void ConfigureCost(this ModelBuilder builder)
+    {
+        builder.Entity<Cost>(b =>
+        {
+            b.ToTable(OnMuhasebeConsts.DbTablePrefix + "Costs", OnMuhasebeConsts.DbSchema);
+            b.ConfigureByConvention();
+            //properties
+            b.Property(x => x.Code)
+              .IsRequired()
+              .HasColumnType(SqlDbType.VarChar.ToString())
+              .HasMaxLength(EntityConsts.MaxCodeLength);
+
+            b.Property(x => x.Name)
+                .IsRequired()
+                .HasColumnType(SqlDbType.VarChar.ToString())
+                .HasMaxLength(EntityConsts.MaxNameLength);
+
+            b.Property(x => x.KdvRate)
+                .IsRequired()
+                .HasColumnType(SqlDbType.Int.ToString());
+
+            b.Property(x => x.UnitPrice)
+                .IsRequired()
+                .HasColumnType(SqlDbType.Money.ToString())
+                .HasMaxLength(EntityConsts.MaxBarcodeLength);
+
+            b.Property(x => x.BarCode)
+                 .HasColumnType(SqlDbType.VarChar.ToString());
+
+            b.Property(x => x.UnitId)
+                 .IsRequired()
+                 .HasColumnType(SqlDbType.UniqueIdentifier.ToString());
+
+            b.Property(x => x.SpecialCode1Id)
+               .HasColumnType(SqlDbType.UniqueIdentifier.ToString());
+
+            b.Property(x => x.SpecialCode2Id)
+                .HasColumnType(SqlDbType.UniqueIdentifier.ToString());
+
+            b.Property(x => x.Description)
+                .HasColumnType(SqlDbType.VarChar.ToString())
+                .HasMaxLength(EntityConsts.MaxDescriptionLength);
+
+            b.Property(x => x.Status)
+                .HasColumnType(SqlDbType.Bit.ToString());
+            //indexs
+            b.HasIndex(x => x.Code);
+            //relations
+            b.HasOne(x => x.Unit)
+                .WithMany(x => x.Costs)
+                .OnDelete(DeleteBehavior.NoAction);
+            b.HasOne(x => x.SpecialCode1)
+                .WithMany(x => x.SpecialCode1Costs)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            b.HasOne(x => x.SpecialCode2)
+                .WithMany(x => x.SpecialCode2Costs)
+                .OnDelete(DeleteBehavior.NoAction);
+
+        });
+    }
+
+    public static void ConfigureSpecialCode(this ModelBuilder builder)
+    {
+        builder.Entity<SpecialCode>(b =>
+        {
+            b.ToTable(OnMuhasebeConsts.DbTablePrefix + "SpecialCodes", OnMuhasebeConsts.DbSchema);
+            b.ConfigureByConvention();
+            //properties
+            b.Property(x => x.Code)
+              .IsRequired()
+              .HasColumnType(SqlDbType.VarChar.ToString())
+              .HasMaxLength(EntityConsts.MaxCodeLength);
+
+            b.Property(x => x.Name)
+                .IsRequired()
+                .HasColumnType(SqlDbType.VarChar.ToString())
+                .HasMaxLength(EntityConsts.MaxNameLength);
+
+            b.Property(x => x.CodeType)
+               .IsRequired()
+               .HasColumnType(SqlDbType.TinyInt.ToString());
+
+            b.Property(x => x.CartType)
+                .IsRequired()
+                .HasColumnType(SqlDbType.TinyInt.ToString());
+
+            b.Property(x => x.Description)
+                .HasColumnType(SqlDbType.VarChar.ToString())
+                .HasMaxLength(EntityConsts.MaxDescriptionLength);
+
+            b.Property(x => x.Status)
+                .HasColumnType(SqlDbType.Bit.ToString());
+            //indexs
+            b.HasIndex(x => x.Code);
+            //relations
+           
+        });
+    }
+
+    public static void ConfigureStock(this ModelBuilder builder)
+    {
+        builder.Entity<Stock>(b =>
+        {
+            b.ToTable(OnMuhasebeConsts.DbTablePrefix + "Stocks", OnMuhasebeConsts.DbSchema);
+            b.ConfigureByConvention();
+            //properties
+            b.Property(x => x.Code)
+              .IsRequired()
+              .HasColumnType(SqlDbType.VarChar.ToString())
+              .HasMaxLength(EntityConsts.MaxCodeLength);
+
+            b.Property(x => x.Name)
+                .IsRequired()
+                .HasColumnType(SqlDbType.VarChar.ToString())
+                .HasMaxLength(EntityConsts.MaxNameLength);
+
+            b.Property(x => x.KdvRate)
+                .IsRequired()
+                .HasColumnType(SqlDbType.Int.ToString());
+
+            b.Property(x => x.UnitPrice)
+                .IsRequired()
+                .HasColumnType(SqlDbType.Money.ToString())
+                .HasMaxLength(EntityConsts.MaxBarcodeLength);
+
+            b.Property(x => x.BarCode)
+                 .HasColumnType(SqlDbType.VarChar.ToString());
+
+            b.Property(x => x.UnitId)
+                 .IsRequired()
+                 .HasColumnType(SqlDbType.UniqueIdentifier.ToString());
+
+            b.Property(x => x.SpecialCode1Id)
+               .HasColumnType(SqlDbType.UniqueIdentifier.ToString());
+
+            b.Property(x => x.SpecialCode2Id)
+                .HasColumnType(SqlDbType.UniqueIdentifier.ToString());
+
+            b.Property(x => x.Description)
+                .HasColumnType(SqlDbType.VarChar.ToString())
+                .HasMaxLength(EntityConsts.MaxDescriptionLength);
+
+            b.Property(x => x.Status)
+                .HasColumnType(SqlDbType.Bit.ToString());
+            //indexs
+            b.HasIndex(x => x.Code);
+            //relations
+            b.HasOne(x => x.Unit)
+                .WithMany(x => x.Stocks)
+                .OnDelete(DeleteBehavior.NoAction);
+            b.HasOne(x => x.SpecialCode1)
+                .WithMany(x => x.SpecialCode1Stocks)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            b.HasOne(x => x.SpecialCode2)
+                .WithMany(x => x.SpecialCode2Stocks)
+                .OnDelete(DeleteBehavior.NoAction);
+
+        });
+    }
+
+    public static void ConfigureBranch(this ModelBuilder builder)
+    {
+        builder.Entity<Branch>(b =>
+        {
+            b.ToTable(OnMuhasebeConsts.DbTablePrefix + "Branchs", OnMuhasebeConsts.DbSchema);
+            b.ConfigureByConvention();
+            //properties
+            b.Property(x => x.Code)
+              .IsRequired()
+              .HasColumnType(SqlDbType.VarChar.ToString())
+              .HasMaxLength(EntityConsts.MaxCodeLength);
+
+            b.Property(x => x.Name)
+                .IsRequired()
+                .HasColumnType(SqlDbType.VarChar.ToString())
+                .HasMaxLength(EntityConsts.MaxNameLength);
+
+            b.Property(x => x.PhoneNumber)
+               .IsRequired()
+               .HasColumnType(SqlDbType.VarChar.ToString())
+               .HasMaxLength(EntityConsts.MaxPhoneNumberLength);
+
+            b.Property(x => x.Email)
+               .IsRequired()
+               .HasColumnType(SqlDbType.VarChar.ToString())
+               .HasMaxLength(EntityConsts.MaxEmailLength);
+
+            b.Property(x => x.Email)
+              .IsRequired()
+              .HasColumnType(SqlDbType.VarChar.ToString())
+              .HasMaxLength(EntityConsts.MaxAddressLength);
+
+            b.Property(x => x.Description)
+                .HasColumnType(SqlDbType.VarChar.ToString())
+                .HasMaxLength(EntityConsts.MaxDescriptionLength);
+
+            b.Property(x => x.Status)
+                .HasColumnType(SqlDbType.Bit.ToString());
+            //indexs
+            b.HasIndex(x => x.Code);
+            //relations
+
         });
     }
 }

@@ -125,8 +125,10 @@ public class OnMuhasebeDbContext :
         builder.ConfigureCash();
         builder.ConfigureReceipt();
         builder.ConfigureReceiptMovement();
-
-
+        builder.ConfigureCost();
+        builder.ConfigureSpecialCode();
+        builder.ConfigureStock();
+        builder.ConfigureBranch();
 
     }
 }

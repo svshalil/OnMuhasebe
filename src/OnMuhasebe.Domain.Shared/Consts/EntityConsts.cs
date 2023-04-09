@@ -6,5 +6,6 @@ public static class EntityConsts
     public const int MaxDescriptionLength = 200;
     public const int MaxPhoneNumberLength = 15;
     public const int MaxAddressLength = 150;
+    public const int MaxEmailLength = 100;
     public const int MaxBarcodeLength = 128;
 }
